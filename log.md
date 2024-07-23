@@ -5,6 +5,7 @@
 - [ ] vue复习
 - [ ] 课件阅读
 - [ ] 各官网文档通读（MDN\Vue\Route\Pinia\TS\React\ol\leaflet\mapbox\cesium）
+- [ ] 前端书籍（JS）
 
 ## 0717
 
@@ -70,8 +71,48 @@ feature-source-layer-map
 
 app.vue实现 
 
-1.高德地图加载
+- [x] 1.高德地图加载
 
-2.控件实现
+- [x] 2.控件实现
 
-3.GeoJSON图层加载
+- [x] 3.GeoJSON图层加载
+
+## 0722
+
+vue3 中导出app,没有方法直接在子组件中获取app吗？
+
+异步组件？
+
+keep-alive包裹组件
+
+深结构层级的解构？
+
+e.cordinates?如果不是在map中，e.coordinates是屏幕像素点位置吗？
+
+```vue
+//canvas：
+let canvas = document.createElement("canvas");
+let ctx = canvas.getContext("2d");
+const style = new ol.style.Style({
+        image: new ol.style.Icon({
+            img: canvas,
+            imgSize: [canvas.width, canvas.height]
+        })
+    })
+
+```
+
+
+
+待办：
+
+- [ ] 测试 keep-alive、异步组件、父子组件生命周期和路由跳转生命周期
+- [x] ol vue3 prototype
+- [ ] feature绘制
+- [ ] draw绘制
+- [ ] popup弹窗
+- [ ] 悬浮显示作业
+
+0723
+
+geojson 应该是vue文件还是js文件？
