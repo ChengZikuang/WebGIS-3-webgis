@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- 1、导入openlayers的依赖 -->
+    <link rel="stylesheet" href="https://lib.baomitu.com/ol3/4.6.5/ol.css">
+    <script src="https://lib.baomitu.com/ol3/4.6.5/ol.js"></script>
+    <script src="./utils/setAnimateStyle.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .ol-popup {
+            position: absolute;
+            background-color: white;
+            -webkit-filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
+            filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #cccccc;
+            bottom: 20px;
+            left: -66px;
+            z-index: 100;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .ol-popup:after,
+        .ol-popup:before {
+            top: 100%;
+            border: solid transparent;
+            content: " ";
+            height: 0;
+            width: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .ol-popup:after {
+            border-top-color: white;
+            border-width: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .ol-popup:before {
+            border-top-color: #cccccc;
+            border-width: 11px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .ol-popup-closer {
+            text-decoration: none;
+            position: absolute;
+            top: 2px;
+            right: 8px;
+        }
+
+        .ol-popup-closer:after {
+            content: "✖";
+        }
+
+        #popup-content {
+            font-size: 14px;
+            font-family: "微软雅黑";
+        }
+
+        #popup-content .markerInfo {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 2、设置地图容器的挂载点 -->
+    <div id="popup" class="ol-popup">
+        <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+        <div id="popup-content">
+            <h2>武汉</h2>
+        </div>
+    </div>
+    <div id="map">
+
+    </div>
+    <script>
+        /* 3、设置一个瓦片图层 */
+        const gaode = new ol.layer.Tile({
+            title: "高德地图",
+            source: new ol.source.XYZ({
+                url: 'http://wprd0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&style=7&x={x}&y={y}&z={z}',
+                wrapX: false
+            })
+        });
+        /* 4、实例化地图 */
+        /* new Vue({
+            el
+        }) */
+        const map = new ol.Map({
+            /* 将实例化的地图挂载到对应的DOM元素上 */
+            target: "map",
+            layers: [gaode],
+            /* 设置地图以中心点显示/坐标显示/方法级别显示 */
+            view: new ol.View({
+                center: [114.30, 30.50],
+                zoom: 12,
+                /* 坐标 */
+                projection: "EPSG:4326"
+            })
+
+        })
+        var data = {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {
+                        name: "汉口站"
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [114.255963, 30.623949]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "properties": {
+                        name: "武汉站"
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [114.425333, 30.613397]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "properties": {
+                        name: "武昌站"
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [114.314208, 30.534877]
+                    }
+                }
+            ]
+        }
+        /* 一、data转成ol要素 */
+        let features = new ol.format.GeoJSON().readFeatures(data);
+        let source = new ol.source.Vector({
+            features
+        })
+        let layer = new ol.layer.Vector({
+            source,
+            style: setAnimateStyle({ map })
+        })
+        map.addLayer(layer);
+
+        /* 点击地图上的要素,出现Popup弹窗 */
+        /* 1、构建Popup弹窗 html+css */
+        /* 2、Popup-html,css 转换成ol-popup弹窗要素new ol.Overlay */
+        // 二. 将dom转换成overlay
+        var container = document.getElementById('popup');
+        var content = document.getElementById('popup-content');
+        var closer = document.getElementById('popup-closer')
+        const popup = new ol.Overlay({
+            //要转换成overlay的HTML元素
+            element: container,
+            //当前窗口可见
+            autoPan: true,
+            //Popup放置的位置
+            positioning: 'bottom-center',
+            //是否应该停止事件传播到地图窗口
+            stopEvent: true,
+            autoPanAnimation: {
+                //当Popup超出地图边界时，为了Popup全部可见，地图移动的速度
+                duration: 250,
+            },
+        })
+        map.addOverlay(popup)
+        /* 3、对地图监听,点击到对应要素popup弹窗显示 */
+        //为map添加鼠标移动事件监听,当鼠标移动到元素上的时候会显示手型
+        map.on('pointermove', function (e) {
+            var pixel = map.getEventPixel(e.originalEvent);
+            var hit = map.hasFeatureAtPixel(pixel);
+            map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+        });
+        // 为map添加点击事件监听，渲染弹出popup
+        map.on('click', function (e) {
+            // 获取当前点击的点是否存在要素, 并返回
+            const feature = map.forEachFeatureAtPixel(
+                //
+                e.pixel,
+                function (feature, layer) {
+                    return feature
+                }
+            )
+            if (feature) {
+                var position = feature.getGeometry().getCoordinates();
+                // content.innerHTML = feature.get("name");
+                popup.setPosition(position)
+            }
+        })
+
+        //添加关闭按钮的单击事件（隐藏popup）
+        closer.onclick = function () {
+            //未定义popup位置
+            popup.setPosition(undefined);
+            //失去焦点
+            closer.blur();
+            return false;
+        };
+    </script>
+</body>
+
+</html>

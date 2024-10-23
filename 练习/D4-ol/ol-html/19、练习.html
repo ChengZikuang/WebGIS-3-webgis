@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- 1、导入openlayers的依赖 -->
+    <link rel="stylesheet" href="https://lib.baomitu.com/ol3/4.6.5/ol.css">
+    <script src="https://lib.baomitu.com/ol3/4.6.5/ol.js"></script>
+    <script src="./utils/createDraw.js"></script>
+    <script src="./utils/index.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #btn {
+            width: 100px;
+            height: 40px;
+            position: fixed;
+            top: 20px;
+            left: 60px;
+            z-index: 100;
+        }
+
+        #clear {
+            width: 100px;
+            height: 40px;
+            position: fixed;
+            top: 20px;
+            left: 170px;
+            z-index: 100;
+        }
+    </style>
+</head>
+
+<body>
+    <button id="btn" onclick="activeDraw()">Point</button>
+    <button id="clear" onclick="clearDraw()">清除</button>
+    <!-- 2、设置地图容器的挂载点 -->
+    <div id="map">
+
+    </div>
+    <script>
+        /* 3、设置一个瓦片图层 */
+        const gaode = new ol.layer.Tile({
+            title: "高德地图",
+            source: new ol.source.XYZ({
+                url: 'http://wprd0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&style=7&x={x}&y={y}&z={z}',
+                wrapX: false
+            })
+        });
+        /* 4、实例化地图 */
+        /* new Vue({
+            el
+        }) */
+        const map = new ol.Map({
+            /* 将实例化的地图挂载到对应的DOM元素上 */
+            target: "map",
+            layers: [gaode],
+            /* 设置地图以中心点显示/坐标显示/方法级别显示 */
+            view: new ol.View({
+                center: [114.30, 30.50],
+                zoom: 12,
+                /* 坐标 */
+                projection: "EPSG:4326"
+            })
+
+        })
+        /* 1、激活画笔-获取坐标  图层的style设置marker */
+        let source = new ol.source.Vector({
+
+        })
+        let layer = new ol.layer.Vector({
+            source,
+            style: setMarkerStyle('./images/定位.png')
+        })
+        map.addLayer(layer);
+        let draw = createDraw({
+            type: "Point",
+            source
+        })
+        let btn = document.getElementById("btn")
+        function activeDraw() {
+            /* 设置btn样式 */
+            btn.disabled = true;
+            btn.style.cursor = "no-drop";
+            map.addInteraction(draw);
+        }
+        /* 监听画笔 */
+        draw.on("drawend", evt => {
+            console.log(evt);
+            /* 重置样式 */
+            btn.disabled = false;
+            btn.style.cursor = "default";
+            /* 移除画笔 */
+            map.removeInteraction(draw);
+        })
+
+        function clearDraw() {
+            source.clear();
+        }
+    </script>
+</body>
+
+</html>

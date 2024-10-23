@@ -35,7 +35,7 @@ onMounted(async () => {
       }),
     }),
   });
-  map.addLayer(citybound)
+  map.addLayer(citybound);
 });
 </script>
 

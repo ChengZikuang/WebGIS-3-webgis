@@ -17,7 +17,7 @@ const mouse = new MousePosition({
 });
 
 onMounted(() => {
-//   console.log("onMonuted in MapControl.vue");
+  //   console.log("onMonuted in MapControl.vue");
   const { proxy } = getCurrentInstance();
   const map = proxy.$map;
 
@@ -25,7 +25,7 @@ onMounted(() => {
 });
 </script>
 
-<style >
+<style>
 .custom-mouse-position {
   position: fixed;
   bottom: 0px;
